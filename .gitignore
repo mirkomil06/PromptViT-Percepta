@@ -1,0 +1,44 @@
+# ===============================
+# Ignore datasets and large files
+# ===============================
+data/
+datasets/
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# ===============================
+# Ignore Python cache and notebooks
+# ===============================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.ipynb_checkpoints/
+
+# ===============================
+# Ignore environment and system files
+# ===============================
+.env
+.venv/
+.DS_Store
+Thumbs.db
+
+# ===============================
+# Ignore Colab / temporary logs
+# ===============================
+*.log
+*.tmp
+*.swp
+*.bak
+
+# ===============================
+# Ignore model weights and outputs
+# ===============================
+checkpoints/
+outputs/
+*.pt
+*.pth
+*.h5

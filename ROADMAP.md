@@ -35,8 +35,9 @@ Each update should include **3–6 short bullet points** about progress, challen
 ### Week 2 (Oct 21–27)
 - [x] Reviewed 4 core papers (ViT, Visual Prompt Tuning, CAM, Transformer Interpretability)
 - [x] Created literature review summary table
-- [x] Downloaded and verified CUB-200, Cars, and Flowers datasets
-- [x] Prepared data preprocessing scripts and documentation
+- [x] Documented dataset sources and Kaggle download links
+- [x] Downloaded and organized datasets locally (not uploaded due to size limits)
+- [x] Prepared data preprocessing plan and documentation
 #### 📚 Literature Review Summary
 | # | Paper | Year | Contribution |
 |:-:|--------|------|---------------|
