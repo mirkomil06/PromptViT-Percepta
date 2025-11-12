@@ -45,6 +45,8 @@ Each update should include **3–6 short bullet points** about progress, challen
 | 3 | Zhou et al., *CAM* | 2016 | Introduced class activation maps |
 | 4 | Chefer et al., *Transformer Interpretability* | 2021 | Transformer explainability via relevance propagation |
 
+➡️ [Full Literature Review Summary](References/Literature_Review_Summary.md)
+
 
 ### Week 3 (Oct 28–Nov 3)
 - [ ] Implement baseline ViT fine-tuning  
