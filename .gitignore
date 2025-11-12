@@ -1,7 +1,9 @@
 # ===============================
 # Ignore datasets and large files
 # ===============================
-data/
+data/cars/
+data/flowers/
+data/cub200/
 datasets/
 *.zip
 *.tar
