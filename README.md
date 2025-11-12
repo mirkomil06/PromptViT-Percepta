@@ -11,6 +11,10 @@ Our research focuses on balancing **performance** and **explainability**, demons
 
 ---
 
+> **Update (Week 2):** Literature review of 4 key papers completed (ViT, VPT, CAM, Transformer-CAM); datasets (CUB-200, Cars, Flowers) prepared for baseline training.
+
+---
+
 ## 👥 Team Members  
 | Name | Student ID | Email | Role |
 |------|-------------|--------|------|
@@ -63,7 +67,7 @@ These datasets are ideal for evaluating fine-grained classification performance 
 | Week | Milestone | Owner | Due Date |
 |------|------------|--------|----------|
 | Week 1 | Team formation & topic selection | All | Oct 21 |
-| Week 2 | Related work summary + dataset setup | Asilbek | Oct 27 |
+| Week 2 | Literature review (5–10 papers) + dataset preparation | Asilbek | Oct 27 |
 | Week 3 | Baseline ViT training on CUB-200 | Mirkomil | Nov 3 |
 | Week 4 | Prompt-tuning implementation | Muhammad | Nov 10 |
 | Week 5 | Explainability (Prompt-CAM) integration | Mirkomil | Nov 17 |
