@@ -1,0 +1,15 @@
+experiment_name: cub_vit_baseline_cpu
+output_dir: outputs/cub_baseline_cpu
+
+dataset:
+  root: data/cub200/CUB_200_2011
+  image_size: 224
+
+training:
+  batch_size: 16          # уменьшено, чтобы CPU выдержал
+  num_workers: 0          # обязательно! иначе Python multiprocessing лагает на Windows
+  num_epochs: 5           # CPU долго, поэтому для старта лучше 5
+  lr: 0.0003
+  weight_decay: 0.01
+  device: "cpu"           # фиксируем CPU
+  seed: 42

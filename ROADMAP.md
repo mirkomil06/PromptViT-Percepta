@@ -48,10 +48,11 @@ Each update should include **3–6 short bullet points** about progress, challen
 
 ➡️ [Full Literature Review Summary](References/Literature_Review_Summary.md)
 
-
 ### Week 3 (Oct 28–Nov 3)
-- [ ] Implement baseline ViT fine-tuning  
-- [ ] Log initial metrics and checkpoints  
+- [x] Implemented ViT-B/16 baseline fine-tuning on CUB-200 (CPU)
+- [x] Stored training logs and metrics in results/cub_baseline_cpu.txt
+- [x] Saved model checkpoint: outputs/cub_baseline_cpu/best_model.pth
+- [x] Created inference script and validated model on a sample image
 
 ### Week 4 (Nov 4–10)
 - [ ] Add prompt-tuning modules and configuration  
