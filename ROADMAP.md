@@ -55,8 +55,12 @@ Each update should include **3–6 short bullet points** about progress, challen
 - [x] Created inference script and validated model on a sample image
 
 ### Week 4 (Nov 4–10)
-- [ ] Add prompt-tuning modules and configuration  
-- [ ] Validate training performance on smaller splits  
+- [x] Implemented ViT-B/16 + VPT-Shallow (10 prompt tokens)
+- [x] Added config: `src/configs/cub_vpt_shallow.yaml`
+- [x] Added training script: `src/scripts/train_cub_vpt.py`
+- [x] Trained VPT-Shallow on CUB-200 (CPU, 5 epochs)
+- [x] Logged results in `results/cub_vpt_shallow_cpu.txt`
+- [x] Saved checkpoint: `outputs/cub_vpt_shallow/best_model.pth`
 
 ### Week 5 (Nov 11–17)
 - [ ] Integrate Prompt-CAM and visualize attention heatmaps  

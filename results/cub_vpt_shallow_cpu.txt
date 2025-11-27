@@ -1,0 +1,56 @@
+=== VPT-Shallow — ViT-B/16 on CUB-200-2011 (CPU Training) ===
+Project: PromptViT-Percepta
+Author: Mirkomil Mirzohidov
+Week: 4 — Prompt-Tuning (VPT-Shallow)
+
+--------------------------------------------------------
+MODEL DETAILS
+--------------------------------------------------------
+Backbone Architecture : ViT-B/16 (timm)
+Pretrained Weights    : ImageNet-21k → 1k
+Adaptation Method     : Visual Prompt Tuning (VPT-Shallow)
+Backbone Frozen       : Yes (all ViT weights frozen)
+Prompt Tokens         : 10 learnable tokens
+Trainable Components  : Prompt embeddings + classification head
+
+--------------------------------------------------------
+TRAINING CONFIGURATION (CPU)
+--------------------------------------------------------
+Device       : CPU
+Epochs       : 5
+Batch Size   : 16
+Image Size   : 224x224
+Optimizer    : AdamW
+LR           : 3e-4
+Weight Decay : 0.01
+Dataset      : CUB-200-2011
+Train Samples: 5994
+Test Samples : 5794
+
+--------------------------------------------------------
+TRAINING RESULTS (VPT-SHALLOW)
+--------------------------------------------------------
+Epoch 1: train_acc ≈ 42.68% | val_acc ≈ 69.71%
+Epoch 2: train_acc ≈ 79.48% | val_acc ≈ 76.29%
+Epoch 3: train_acc ≈ 88.39% | val_acc ≈ 78.79%
+Epoch 4: train_acc ≈ 92.53% | val_acc ≈ 80.48%
+Epoch 5: train_acc ≈ 95.60% | val_acc ≈ 80.45%
+
+Best Validation Accuracy: 80.48% (Epoch 4)
+Checkpoint Saved        : outputs/cub_vpt_shallow/best_model.pth
+
+--------------------------------------------------------
+BASELINE VS VPT COMPARISON (CPU, 5 epochs)
+--------------------------------------------------------
+Baseline ViT-B/16 (full fine-tuning):
+- Best Val Accuracy: 13.62%
+- Trainable Params : ~86M (full model)
+
+VPT-Shallow (frozen backbone + prompts):
+- Best Val Accuracy: 80.48%
+- Trainable Params : << 86M (only prompts + head)
+
+Interpretation:
+- VPT-Shallow dramatically improves validation accuracy compared to the baseline CPU run.
+- Freezing the ViT backbone and training only prompt tokens + head is much more efficient and still highly effective.
+- Even on pure CPU and only 5 epochs, the model reaches strong fine-grained recognition performance.

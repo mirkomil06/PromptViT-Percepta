@@ -20,17 +20,18 @@ This project explores prompt-tuned Vision Transformers for fine-grained image cl
 3. [Quickstart](#-quickstart)  
 4. [Repository Structure](#-repository-structure)  
 5. [Baseline Results (Week 3)](#-baseline-results-week-3)  
-6. [Datasets Used](#-datasets-used)  
-7. [Methodology](#-methodology)  
-8. [Project Roadmap](#-project-roadmap)  
-9. [Team](#-team-percepta)  
-10. [Tech Stack](#-tech-stack)  
-11. [Ethics & Compliance](#-ethics--compliance)  
-12. [Expected Outcomes](#-expected-outcomes)  
-13. [Experiments & Evaluation](#-experiments--evaluation)  
-14. [References](#-references)  
-15. [License](#-license)  
-16. [Repository Link](#-repository-link)
+6. [Prompt-Tuning Results (Week 4 — VPT-Shallow)](#-prompt-tuning-results-week-4--vpt-shallow)
+7. [Datasets Used](#-datasets-used)  
+8. [Methodology](#-methodology)  
+9. [Project Roadmap](#-project-roadmap)  
+10. [Team](#-team-percepta)  
+11. [Tech Stack](#-tech-stack)  
+12. [Ethics & Compliance](#-ethics--compliance)  
+13. [Expected Outcomes](#-expected-outcomes)  
+14. [Experiments & Evaluation](#-experiments--evaluation)  
+15. [References](#-references)  
+16. [License](#-license)  
+17. [Repository Link](#-repository-link)
 
 ---
 
@@ -97,16 +98,24 @@ data/
         └── test/
 ```
 
-### 5. Train the baseline model (CUB-200)
+### 5. Train the baseline model (Week 3)
 ```bash
 python -m src.scripts.train_cub_baseline --config src/configs/cub_baseline.yaml
 ```
 
-### 6. Run inference on a single image
+### 6. Train the VPT-Shallow model (Week 4)
+```bash
+python -m src.scripts.train_cub_vpt --config src/configs/cub_vpt_shallow.yaml
+```
+
+### 7. Run inference on a single image (Baseline model)
 ```bash
 python -m src.scripts.infer_cub_baseline --image "data/cub200/CUB_200_2011/images/...jpg"
 ```
 This will output the predicted class and confidence score.
+
+### 8. (Optional) VPT inference
+A dedicated script for VPT inference (`infer_cub_vpt.py`) will be added in **Week 5**.
 
 ---
 
@@ -129,24 +138,30 @@ PromptViT-Percepta/
 ├── data/ # datasets (not included due to size)
 │
 ├── results/
-│    └── cub_baseline_cpu.txt
+│    ├── cub_baseline_cpu.txt
+│    └── cub_vpt_shallow_cpu.txt
 │
 ├── outputs/
-│    └── cub_baseline_cpu/
+│    ├── cub_baseline_cpu/
+│    │   └── best_model.pth
+│    └── cub_vpt_shallow/
 │        └── best_model.pth
 │
 └── src/
     ├── configs/
-    │    └── cub_baseline.yaml
+    │    ├── cub_baseline.yaml
+    │    └── cub_vpt_shallow.yaml
     ├── datasets/
     │    └── cub200.py
     ├── models/
-    │    └── vit_baseline.py
+    │    ├── vit_baseline.py
+    │    └── vit_vpt_shallow.py
     ├── training/
     │    └── trainer_baseline.py
     └── scripts/
          ├── train_cub_baseline.py
-         └── infer_cub_baseline.py
+         ├── infer_cub_baseline.py
+         └── train_cub_vpt.py
 ```
 
 ---
@@ -180,6 +195,29 @@ PromptViT-Percepta/
 
 ---
 
+## 🌱 Prompt-Tuning Results (Week 4 — VPT-Shallow)
+
+**Method:** Visual Prompt Tuning (VPT-Shallow)  
+**Backbone:** ViT-B/16 (frozen)  
+**Trainable Parts:** Prompt tokens + classification head  
+**Device:** CPU  
+**Epochs:** 5  
+**Dataset:** CUB-200-2011  
+
+| Model                     | Trainable Parameters        | Epochs | Best Val Accuracy |
+|---------------------------|-----------------------------|--------|-------------------|
+| Baseline ViT-B/16 (full) | ~86M (all weights)          | 5      | 13.62%            |
+| VPT-Shallow (10 prompts) | << 86M (prompts + head)     | 5      | **80.48%**        |
+
+### 🧾 Notes
+- The ViT-B/16 backbone remains **fully frozen** during training.  
+- The only trainable components are:  
+  - the **prompt embeddings** (10 learnable tokens),  
+  - the **new classification head** (200 classes).  
+- Even on CPU and with only 5 epochs of training, VPT-Shallow provides a **massive accuracy boost** for fine-grained visual recognition.
+
+---
+
 ## 📚 Datasets Used
 
 We use three widely adopted fine-grained visual classification datasets:
@@ -205,17 +243,18 @@ Our pipeline consists of three major stages:
 - Evaluation: **Accuracy** and **F1-score**.
 
 ### **2. Prompt-Tuning (VPT-Deep / VPT-Shallow)**  
-*Planned for Weeks 4–5.*
+VPT-Shallow was successfully completed in **Week 4**, demonstrating a major accuracy improvement (+66.8% over baseline).  
+Implementation of VPT-Deep is planned for **Weeks 5–6**.
 
 We integrate **Visual Prompt Tuning (VPT)** — a parameter-efficient alternative to full fine-tuning:
 
-- The ViT backbone is **frozen**  
-- Learnable **prompt tokens** are prepended to transformer inputs  
+- The ViT backbone is **fully frozen**  
+- Learnable **prompt tokens** are prepended to the transformer input  
 - Trainable parameters reduce from ~86M → **<1%**  
-- Expected benefits:  
-  - Smaller memory footprint  
-  - Faster training  
-  - Comparable accuracy to full fine-tuning  
+- Benefits of VPT include:  
+  - Much smaller memory footprint  
+  - Faster and more stable training  
+  - Accuracy competitive with (or exceeding) full fine-tuning  
   - Better generalization on limited data
 
 ### **3. Explainability (Prompt-CAM & Attention Rollout)**  
@@ -238,8 +277,8 @@ Goal: Provide **faithful, human-understandable** explanations of model predictio
 | **Week 1** | Oct 14–21 | Repo setup, topic confirmation | ✅ Completed |
 | **Week 2** | Oct 21–27 | Literature review + dataset preparation | ✅ Completed |
 | **Week 3** | Oct 28–Nov 3 | Baseline ViT-B/16 training on CUB-200 | ✅ Completed |
-| **Week 4** | Nov 4–10 | Prompt-tuning implementation (VPT-Deep / VPT-Shallow) | ⏳ In progress |
-| **Week 5** | Nov 11–17 | Explainability module (Prompt-CAM, attention rollout) | ⏳ Upcoming |
+| **Week 4** | Nov 4–10 | Prompt-tuning implementation (VPT-Deep / VPT-Shallow) | ✅ Completed |
+| **Week 5** | Nov 11–17 | Explainability module (Prompt-CAM, attention rollout) | ⏳ In progress |
 | **Week 6** | Nov 18–24 | Evaluation (Accuracy, F1, Pointing Game) | ⏳ Upcoming |
 | **Week 7** | Nov 25–Dec 1 | Report writing & presentation slides | ⏳ Upcoming |
 | **Week 8** | Dec 2–8 | Final cleanup & project presentation | ⏳ Upcoming |
@@ -249,9 +288,9 @@ Goal: Provide **faithful, human-understandable** explanations of model predictio
 ### 🔄 Progress Summary
 
 - Week 1–3: **Core pipeline completed**  
-- Week 4: **Prompt-tuning implementation ongoing**  
-- Future weeks: explainability → evaluation → report → presentation
-
+- Week 4: **Prompt-Tuning (VPT-Shallow) completed — 80.48% val accuracy**  
+- Week 5: Starting work on **Explainability (Prompt-CAM + Attention Rollout)**  
+- Next: Evaluation → report → presentation
 ---
 
 ## 👥 Team Percepta
@@ -317,8 +356,8 @@ Our experiments are designed to compare three major components:
 | Experiment | Description | Status |
 |-----------|-------------|--------|
 | **E1 — Baseline ViT Training** | Full fine-tuning of ViT-B/16 on CUB-200 | ✅ Completed |
-| **E2 — Prompt-Tuning (VPT-Deep)** | Add deep prompt tokens, freeze backbone | ⏳ In progress |
-| **E3 — Prompt-Tuning (VPT-Shallow)** | Add prompts only to the first layer | ⏳ Planned |
+| **E2 — Prompt-Tuning (VPT-Deep)** | Add deep prompt tokens, freeze backbone | ⏳ Planned |
+| **E3 — Prompt-Tuning (VPT-Shallow)** | Add prompts only to the first layer | ✅ Completed |
 | **E4 — Explainability Evaluation** | Generate Prompt-CAM & attention rollout | ⏳ Planned |
 | **E5 — Pointing Game Metric** | Evaluate interpretability quality | ⏳ Planned |
 | **E6 — Cross-dataset Generalization** | Evaluate CUB-trained model on Cars/Flowers | ⏳ Planned |
@@ -344,9 +383,9 @@ We will compare:
 | Model | Trainable Params | Expected Behavior |
 |-------|------------------|------------------|
 | **ViT-B/16 (full fine-tuning)** | ~86M | Highest accuracy, slow training |
-| **VPT-Shallow** | <1% params | Lightweight, faster, stable |
-| **VPT-Deep** | <1% params | Best for complex tasks |
-| **No Prompts (frozen ViT)** | ~0 trainable | Weak baseline |
+| **VPT-Shallow** | <1% params | Lightweight, stable, strong performance |
+| **VPT-Deep** | <1% params | Potentially best performance for complex datasets |
+| **Frozen ViT (no prompts)** | ~0 trainable | Weak baseline |
 
 This comparison will show the **benefit of prompt tuning** vs full fine-tuning.
 
