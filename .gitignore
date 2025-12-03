@@ -1,38 +1,35 @@
 # =========================================================
 # PromptViT-Percepta — Project .gitignore
+# Clean version with support for pushing logs/ metadata
 # =========================================================
 
-# -----------------------
+
+##############################
 # 1. Python
-# -----------------------
+##############################
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-*.pdb
 *.egg-info/
 *.so
 
 # Virtual environments
 .env/
 .venv/
+.venv311/
 venv/
 ENV/
 env/
 
 # Jupyter
 .ipynb_checkpoints/
-*.ipynb_checkpoints/
 
-# -----------------------
-# 2. Datasets (your actual data structure)
-# -----------------------
+
+##############################
+# 2. Datasets (local only)
+##############################
 data/
-data/cub200/
-data/cars/
-data/flowers/
-
-# Prevent accidental giant uploads anywhere
 **/data/
 **/datasets_raw/
 **/images_raw/
@@ -40,9 +37,10 @@ data/flowers/
 # Allow dataset loader code
 !src/datasets/
 
-# -----------------------
+
+##############################
 # 3. Model checkpoints / weights
-# -----------------------
+##############################
 *.pt
 *.pth
 *.ckpt
@@ -51,57 +49,68 @@ data/flowers/
 
 # HuggingFace cache
 huggingface/
-~/.cache/huggingface/
+.cache/huggingface/
 
-# -----------------------
-# 4. Archives (exports, downloads)
-# -----------------------
+
+##############################
+# 4. Archives & exports
+##############################
 *.zip
 *.tar
 *.tar.gz
+*.gz
 *.rar
 *.7z
-
-# Kaggle / Colab dumps
 *.h5
 *.pkl
 *.npz
 
-# -----------------------
-# 5. Training logs / experiments
-# -----------------------
+
+##############################
+# 5. Training logs / TensorBoard
+##############################
+
+# Ignore all heavy event logs
+**/logs/*.tfevents.*
+
+# Allow README.md and .gitignore inside logs/
+!**/logs/
+!**/logs/.gitignore
+!**/logs/README.md
+
+# Ignore other experiment directories
 runs/
-logs/
 wandb/
 lightning_logs/
 mlruns/
-
-# TensorBoard
 tb_logs/
-events.*
 
-# -----------------------
-# 6. IDE & Editor junk
-# -----------------------
+
+##############################
+# 6. IDE & Editor files
+##############################
 .vscode/
 .idea/
 *.code-workspace
 
-# OS files
+# OS-generated
 .DS_Store
 Thumbs.db
 
-# -----------------------
+
+##############################
 # 7. Temporary files
-# -----------------------
+##############################
 *.tmp
 *.temp
 *.bak
 *.old
 
-# -----------------------
-# 8. PDFs not created by repo
-# -----------------------
-*.pdf
-!CV25_Proposal_Percepta.pdf       # keep your project proposal
 
+##############################
+# 8. PDFs
+##############################
+*.pdf
+
+# Allow only your official proposal
+!CV25_Proposal_Percepta.pdf

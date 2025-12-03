@@ -1,5 +1,5 @@
-experiment_name: cub_vpt_shallow
-output_dir: outputs/cub_vpt_shallow
+experiment_name: cub_vpt_deep
+output_dir: outputs/cub_vpt_deep
 
 dataset:
   root: data/cub200/CUB_200_2011
@@ -8,7 +8,7 @@ dataset:
 training:
   batch_size: 16
   num_workers: 0          # required for Windows stability
-  num_epochs: 30
+  num_epochs: 30          # как у VPT-Shallow, честное сравнение
   lr: 0.0003
   weight_decay: 0.01
   device: cuda
@@ -16,7 +16,7 @@ training:
   seed: 42
 
 model:
-  type: vit_vpt_shallow
+  type: vit_vpt_deep
   num_classes: 200
   pretrained: true
   num_prompts: 10

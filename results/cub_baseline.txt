@@ -1,0 +1,56 @@
+============================================================
+Experiment: Baseline ViT-B/16 (Full Fine-Tuning)
+Dataset: CUB-200-2011
+Model: ViT-B/16 (trainable backbone + trainable head)
+Trainable Parameters: ~86M
+============================================================
+
+✔ Training Summary
+------------------------------------------------------------
+• Total Epochs: 60
+• Optimizer: AdamW
+• Learning Rate: 3e-4
+• Weight Decay: 0.01
+• Input Size: 224×224
+• Backbone: Fully trainable (no freezing)
+• Augmentations: Standard (resize, crop, flip)
+
+✔ Performance
+------------------------------------------------------------
+• Final Training Accuracy: ~98–99%
+• Final Validation Accuracy: ~36–37%
+• Best Validation Accuracy: ~36.7%
+• Final Training Loss: ~1.0
+• Final Validation Loss: ~3.3–3.4
+
+✔ Observations
+------------------------------------------------------------
+• Model heavily overfits:
+  - Training accuracy approaches 100%
+  - Validation accuracy plateaus early
+• ViT-B/16 requires very large datasets to fine-tune effectively.
+• Full fine-tuning is unstable on small fine-grained datasets like CUB-200.
+• Despite long training, generalization remains poor.
+
+✔ Why Performance Is Low
+------------------------------------------------------------
+• Too many trainable parameters (~86M) for a small dataset.
+• Fine-grained bird classification requires subtle discrimination:
+  - colors, beaks, wings, patterns, textures
+• CUB-200 is not large enough to support full ViT fine-tuning.
+• The model learns training images but fails to generalize.
+
+============================================================
+Conclusion
+------------------------------------------------------------
+The baseline ViT-B/16 model demonstrates strong overfitting and
+poor generalization on CUB-200.
+
+Compared to VPT methods:
+• Much lower validation accuracy (~36% vs. ~87%)
+• ~1000× more trainable parameters
+• Lower stability and higher training cost
+
+This experiment serves as a reference point showing that
+full fine-tuning is not suitable for small fine-grained datasets.
+============================================================

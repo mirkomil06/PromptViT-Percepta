@@ -10,7 +10,7 @@ from torchvision import transforms
 class CUB200Dataset(Dataset):
     """
     PyTorch Dataset для CUB_200_2011.
-    Ориентируется на официальные файлы:
+    Использует официальные файлы:
       - images.txt
       - image_class_labels.txt
       - train_test_split.txt
@@ -18,18 +18,19 @@ class CUB200Dataset(Dataset):
     def __init__(self, root: str, train: bool = True, image_size: int = 224):
         """
         :param root: путь до папки CUB_200_2011 (где лежат images.txt и т.д.)
-        :param train: True -> train split, False -> test split
-        :param image_size: размер, к которому приводим изображение
+        :param train: True -> train split, False -> test/val split
+        :param image_size: базовый размер для ресайза/кропа
         """
         self.root = root
         self.train = train
+        self.image_size = image_size
 
         self.images_dir = os.path.join(root, "images")
         images_txt = os.path.join(root, "images.txt")
         labels_txt = os.path.join(root, "image_class_labels.txt")
         split_txt = os.path.join(root, "train_test_split.txt")
 
-        # Прочитаем все маппинги id → path / label / split
+        # id → path / label / split
         self.id_to_path = {}
         with open(images_txt, "r") as f:
             for line in f:
@@ -57,15 +58,34 @@ class CUB200Dataset(Dataset):
                 full_path = os.path.join(self.images_dir, rel_path)
                 self.samples.append((full_path, label))
 
-        # Трансформации
-        self.transform = transforms.Compose([
-            transforms.Resize((image_size, image_size)),
-            transforms.ToTensor(),
-            transforms.Normalize(
-                mean=[0.485, 0.456, 0.406],   # стандартные ImageNet-статистики
-                std=[0.229, 0.224, 0.225]
-            ),
-        ])
+        # Трансформации: разные для train и val
+        if self.train:
+            self.transform = transforms.Compose([
+                transforms.RandomResizedCrop(self.image_size, scale=(0.7, 1.0)),
+                transforms.RandomHorizontalFlip(p=0.5),
+                transforms.ColorJitter(
+                    brightness=0.2,
+                    contrast=0.2,
+                    saturation=0.2,
+                    hue=0.05,
+                ),
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    mean=[0.485, 0.456, 0.406],   # стандартные ImageNet-статистики
+                    std=[0.229, 0.224, 0.225],
+                ),
+            ])
+        else:
+            # Для валидации/теста — стабильный Resize + CenterCrop
+            self.transform = transforms.Compose([
+                transforms.Resize(int(self.image_size * 1.1)),
+                transforms.CenterCrop(self.image_size),
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    mean=[0.485, 0.456, 0.406],
+                    std=[0.229, 0.224, 0.225],
+                ),
+            ])
 
         print(
             f"[CUB200Dataset] root={root}, train={train}, "

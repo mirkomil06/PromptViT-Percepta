@@ -2,7 +2,7 @@
 
 **Project:** Prompt-Tuned ViTs for Explainable Fine-Grained Recognition  
 **Team:** Percepta  
-**Course:** Computer Vision (Fall 2025)  
+**Course:** Computer Vision (Fall 2024)  
 **Instructor:** Dr. I. Atadjanov & Dr. B. Kiani  
 
 ---
@@ -11,97 +11,139 @@
 
 | Week | Dates | Milestone / Task | Deliverable | Owner(s) |
 |------|--------|------------------|--------------|-----------|
-| **W1** | Oct 14–21 | Team formation, topic confirmation, and repo setup | GitHub repo with README.md and ROADMAP.md created | All |
-| **W2** | Oct 21–27 | Literature review and dataset preparation | Summary table of 5–10 related papers; dataset verified (CUB, Cars, Flowers) | Asilbek |
-| **W3** | Oct 28–Nov 3 | Baseline ViT model setup | Fine-tuning ViT-B/16 on small split (CUB-200) | Mirkomil |
-| **W4** | Nov 4–10 | Prompt-tuning implementation | Code for prompt embedding + model training | Muhammad |
-| **W5** | Nov 11–17 | Explainability module (Prompt-CAM, Attention Rollout) | Visual heatmaps and interpretability results | Mirkomil |
-| **W6** | Nov 18–24 | Evaluation & comparison | Metrics: Accuracy, F1, Pointing Game; results table vs baseline | All |
-| **W7** | Nov 25–Dec 1 | Report writing & cleanup | Midterm proposal (PDF) finalized, slides prepared | Asilbek |
-| **W8** | Dec 2–8 | Final refinements & presentation | Code cleanup, visual results upload, final presentation rehearsal | All |
+| **W1** | Oct 14–21 | Team formation, topic confirmation, repo setup | GitHub repo with README & ROADMAP | All |
+| **W2** | Oct 21–27 | Literature review + dataset preparation | Summary of 4–6 core papers; datasets verified (CUB/Cars/Flowers) | Asilbek |
+| **W3** | Oct 28–Nov 3 | Baseline ViT-B/16 (full fine-tuning) | 60-epoch GPU training + logs + checkpoint | Mirkomil |
+| **W4** | Nov 4–10 | Prompt-Tuning (VPT-Shallow & VPT-Deep) | Training scripts + configs + checkpoints | Muhammad & Mirkomil |
+| **W5** | Nov 11–17 | Explainability (Prompt-CAM + Attention Rollout) | Heatmaps & analysis | Mirkomil |
+| **W6** | Nov 18–24 | Evaluation & comparison | Accuracy, F1, Pointing Game, comparison tables | All |
+| **W7** | Nov 25–Dec 1 | Report writing & slides | Final PDF + presentation | Asilbek |
+| **W8** | Dec 2–8 | Final cleanup & project presentation | Code cleanup, visuals, final rehearsal | All |
 
 ---
 
 ## ✅ Weekly Progress Log  
 
-Use this section to log updates as you work each week.  
-Each update should include **3–6 short bullet points** about progress, challenges, or changes.
+Below is the detailed progress log for each week of development.
 
-### Week 1 (Oct 14–21)
+### **Week 1 (Oct 14–21)**
 - [x] Formed Team Percepta  
 - [x] Created GitHub repository  
-- [x] Added README.md and ROADMAP.md  
+- [x] Added README.md, ROADMAP.md, and project skeleton  
 
-### Week 2 (Oct 21–27)
-- [x] Reviewed 4 core papers (ViT, Visual Prompt Tuning, CAM, Transformer Interpretability)
-- [x] Created literature review summary table
-- [x] Documented dataset sources and Kaggle download links
-- [x] Downloaded and organized datasets locally (not uploaded due to size limits)
-- [x] Prepared data preprocessing plan and documentation
-#### 📚 Literature Review Summary
+---
+
+### **Week 2 (Oct 21–27)**
+- [x] Reviewed 4 major papers:
+  - ViT (2020)
+  - Visual Prompt Tuning (2022)
+  - CAM (2016)
+  - Transformer Interpretability (2021)
+- [x] Wrote literature review summary  
+- [x] Prepared CUB-200, Stanford Cars, and Flowers-102 dataset structure  
+- [x] Documented dataset sources + Kaggle links  
+- [x] Finalized preprocessing plan  
+
+📚 **Literature Review Summary**
+
 | # | Paper | Year | Contribution |
 |:-:|--------|------|---------------|
-| 1 | Dosovitskiy et al., *ViT* | 2020 | Baseline Vision Transformer model |
-| 2 | Jia et al., *Visual Prompt Tuning* | 2022 | Efficient fine-tuning via prompts |
-| 3 | Zhou et al., *CAM* | 2016 | Introduced class activation maps |
-| 4 | Chefer et al., *Transformer Interpretability* | 2021 | Transformer explainability via relevance propagation |
+| 1 | Dosovitskiy et al., *ViT* | 2020 | Introduced Vision Transformer |
+| 2 | Jia et al., *VPT* | 2022 | Efficient prompt-tuning for ViTs |
+| 3 | Zhou et al., *CAM* | 2016 | Class Activation Maps |
+| 4 | Chefer et al., *Transformer Interpretability* | 2021 | Relevance propagation for ViTs |
 
-➡️ [Full Literature Review Summary](References/Literature_Review_Summary.md)
+➡️ Full notes here: [`References/Literature_Review_Summary.md`](./References/Literature_Review_Summary.md)
 
-### Week 3 (Oct 28–Nov 3)
-- [x] Implemented ViT-B/16 baseline fine-tuning on CUB-200 (CPU)
-- [x] Stored training logs and metrics in results/cub_baseline_cpu.txt
-- [x] Saved model checkpoint: outputs/cub_baseline_cpu/best_model.pth
-- [x] Created inference script and validated model on a sample image
+---
 
-### Week 4 (Nov 4–10)
-- [x] Implemented ViT-B/16 + VPT-Shallow (10 prompt tokens)
-- [x] Added config: `src/configs/cub_vpt_shallow.yaml`
-- [x] Added training script: `src/scripts/train_cub_vpt.py`
-- [x] Trained VPT-Shallow on CUB-200 (CPU, 5 epochs)
-- [x] Logged results in `results/cub_vpt_shallow_cpu.txt`
-- [x] Saved checkpoint: `outputs/cub_vpt_shallow/best_model.pth`
+### **Week 3 (Oct 28–Nov 3)**
+- [x] Implemented **baseline ViT-B/16**  
+- [x] Completed **60-epoch GPU training** on CUB-200  
+- [x] Stored logs in `results/cub_baseline.txt`  
+- [x] Saved checkpoint: `outputs/cub_baseline/best_model.pth`  
+- [x] Implemented baseline inference script  
 
-### Week 5 (Nov 11–17)
-- [ ] Integrate Prompt-CAM and visualize attention heatmaps  
-- [ ] Document example explanations  
+---
 
-### Week 6 (Nov 18–24)
-- [ ] Run evaluations, generate comparison tables  
-- [ ] Analyze interpretability–accuracy trade-offs  
+### **Week 4 (Nov 4–10)**
+- [x] Implemented **VPT-Shallow**  
+- [x] Implemented **VPT-Deep**  
+- [x] Added configs:
+  - `cub_vpt_shallow.yaml`
+  - `cub_vpt_deep.yaml`
+- [x] Added scripts:
+  - `train_cub_vpt_shallow.py`
+  - `train_cub_vpt_deep.py`
+- [x] Trained both models on GPU (30 epochs)  
+- [x] Logged results in:
+  - `results/cub_vpt_shallow.txt`
+  - `results/cub_vpt_deep.txt`
+- [x] Saved checkpoints in:
+  - `outputs/cub_vpt_shallow/`
+  - `outputs/cub_vpt_deep/`
 
-### Week 7 (Nov 25–Dec 1)
-- [ ] Write midterm proposal report (CV25_Proposal_Percepta.pdf)  
-- [ ] Prepare PowerPoint presentation  
+---
 
-### Week 8 (Dec 2–8)
-- [ ] Upload final visuals, weights, and report  
-- [ ] Present project in class  
+### **Week 5 (Nov 11–17)**
+- [ ] Implement Prompt-CAM  
+- [ ] Implement Attention Rollout  
+- [ ] Generate first heatmap visualizations  
+- [ ] Add explainability functions to scripts  
+
+---
+
+### **Week 6 (Nov 18–24)**
+- [ ] Compute metrics:
+  - Accuracy  
+  - F1-score  
+  - Pointing Game  
+- [ ] Create comparison table (Baseline vs Shallow vs Deep)  
+- [ ] Create visual grid of CAM/rollout results  
+
+---
+
+### **Week 7 (Nov 25–Dec 1)**
+- [ ] Write final report (PDF)  
+- [ ] Prepare final slide deck  
+- [ ] Add final diagrams + heatmap figures  
+
+---
+
+### **Week 8 (Dec 2–8)**
+- [ ] Final code cleanup  
+- [ ] Add final visualizations to repo  
+- [ ] Practice presentation  
+- [ ] Submit final project  
 
 ---
 
 ## 👥 RACI Matrix  
 
 | Task | Responsible | Accountable | Consulted | Informed |
-|------|--------------|--------------|------------|-----------|
+|------|-------------|-------------|-----------|----------|
 | Repo setup & documentation | Mirkomil | All | — | Instructor |
 | Literature review | Asilbek | Mirkomil | Muhammad | Instructor |
-| Baseline ViT implementation | Mirkomil | Muhammad | — | Team |
-| Prompt-tuning | Muhammad | Mirkomil | Asilbek | Team |
-| Explainability visualization | Mirkomil | All | — | Instructor |
-| Evaluation & metrics | Muhammad | All | — | Instructor |
-| Report & presentation | Asilbek | All | — | Instructor |
+| Baseline ViT training | Mirkomil | Muhammad | — | Team |
+| Prompt-Tuning (Shallow/Deep) | Muhammad | Mirkomil | Asilbek | Team |
+| Explainability (Prompt-CAM + Rollout) | Mirkomil | All | Muhammad | Instructor |
+| Evaluation metrics | Muhammad | All | — | Instructor |
+| Final report & presentation | Asilbek | All | — | Instructor |
 
 ---
 
 ## 🚀 Deliverables Summary  
 
-- ✅ **Midterm Proposal:** 4–6 page PDF (CV25_Proposal_Percepta.pdf)  
-- ✅ **Code Repository:** Working repo with README.md and ROADMAP.md  
-- ✅ **Model Outputs:** Trained checkpoints and sample visualizations  
-- ✅ **Presentation Slides:** Final midterm presentation (5–8 minutes)  
-- ✅ **Weekly Logs:** Updated progress in ROADMAP.md  
+- **Baseline ViT-B/16** (60-epoch training)  
+- **Prompt-Tuned Models:** VPT-Shallow & VPT-Deep  
+- **Explainability Toolbox:** CAM + Attention Rollout  
+- **Evaluation Tables:** Accuracy, F1, Pointing Game  
+- **Visual Outputs:** Heatmaps + attention maps  
+- **Final PDF Report**  
+- **Final Presentation Slides**  
+- **Updated Weekly Roadmap**  
 
 ---
 
-> *Maintained by Team Percepta – Central Asian University, Fall 2025*
+> *Maintained by Team Percepta — Central Asian University, Fall 2024*
+

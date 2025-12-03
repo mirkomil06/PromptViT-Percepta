@@ -5,12 +5,12 @@ import timm
 
 class ViTVPTShallow(nn.Module):
     """
-    Vision Transformer + shallow Visual Prompt Tuning.
+    Vision Transformer + shallow Visual Prompt Tuning (VPT).
 
     - Backbone: vit_base_patch16_224 from timm
-    - Backbone is FROZEN (no gradient)
-    - Learnable prompt tokens are prepended after [CLS]
-    - Only prompts + classification head are trained
+    - Backbone заморожен (no grad)
+    - Learnable prompt tokens вставляются ПОСЛЕ [CLS], ПЕРЕД патчами
+    - Обучаются только промпты + классификационный head
     """
     def __init__(
         self,
@@ -20,39 +20,41 @@ class ViTVPTShallow(nn.Module):
     ):
         super().__init__()
 
-        # 1. Load pretrained ViT backbone
+        # 1. Загружаем ViT-B/16 backbone
         self.backbone = timm.create_model(
             "vit_base_patch16_224",
-            pretrained=pretrained
+            pretrained=pretrained,
+            drop_rate=0.1,        # такой же dropout, как у baseline
+            drop_path_rate=0.1,   # такой же stochastic depth
         )
 
-        embed_dim = self.backbone.embed_dim  # 768 for ViT-B/16
+        embed_dim = self.backbone.embed_dim  # 768 для ViT-B/16
 
-        # 2. Remove original head, we'll use our own classifier
+        # 2. Убираем исходный head, используем свой классификатор
         self.backbone.head = nn.Identity()
 
-        # 3. Freeze all backbone parameters (VPT idea)
+        # 3. Замораживаем все параметры backbone (VPT идея)
         for p in self.backbone.parameters():
             p.requires_grad = False
 
-        # 4. Learnable prompt tokens (same for all images, expanded in forward)
+        # 4. Обучаемые prompt-токены (одни для всех картинок, в forward расширяем по batch)
         self.num_prompts = num_prompts
         self.prompt_embeddings = nn.Parameter(
             torch.zeros(1, num_prompts, embed_dim)
         )
         nn.init.normal_(self.prompt_embeddings, std=0.02)
 
-        # 5. New classification head (trainable)
+        # 5. Новый классификационный head (trainable)
         self.head = nn.Linear(embed_dim, num_classes)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
-        Forward pass with shallow prompts:
+        Forward с shallow VPT:
 
         [CLS] + patches  -> add pos_embed
-        insert prompts after [CLS]:
-
-        [CLS] , P1, P2, ..., Pp, patch_1, ..., patch_N
+        -> ВСТАВЛЯЕМ P prompt-токенов ПОСЛЕ CLS
+        -> прогоняем через блоки ViT
+        -> берём CLS и подаём в head
         """
         B = x.shape[0]
 
@@ -65,30 +67,28 @@ class ViTVPTShallow(nn.Module):
         # concat [CLS] + patches → (B, 1+N, D)
         x = torch.cat((cls_tokens, x), dim=1)
 
-        # add position embeddings (only for CLS + patches)
+        # добавляем position embeddings (только для CLS + patches)
         # pos_embed shape: (1, 1+N, D)
         x = x + self.backbone.pos_embed
 
-        # create prompts for this batch
+        # создаём prompt-токены для этого batch’а
         prompt_tokens = self.prompt_embeddings.expand(B, -1, -1)  # (B, P, D)
 
-        # insert prompts AFTER CLS, BEFORE patches
-        # x: [CLS, patch_1, patch_2, ...]
-        # we want: [CLS, P..., patch_1, patch_2, ...]
+        # хотим: [CLS, P1..Pp, patch_1..patch_N]
         x = torch.cat(
             (x[:, :1, :], prompt_tokens, x[:, 1:, :]),
             dim=1
         )  # (B, 1+P+N, D)
 
-        # standard ViT forward over transformer blocks
+        # стандартный ViT forward через блоки
         x = self.backbone.pos_drop(x)
         for blk in self.backbone.blocks:
             x = blk(x)
         x = self.backbone.norm(x)
 
-        # take CLS output (still at index 0)
+        # берём CLS (всё ещё индекс 0)
         cls_out = x[:, 0]
 
-        # classification head
+        # классификационный head
         logits = self.head(cls_out)
         return logits

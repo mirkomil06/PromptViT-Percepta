@@ -2,12 +2,13 @@ import os
 import yaml
 import random
 import argparse
+import platform
 
 import torch
 from torch.utils.data import DataLoader
 
 from src.datasets.cub200 import CUB200Dataset
-from src.models.vit_baseline import ViTBaseline
+from src.models.vit_vpt_shallow import ViTVPTShallow
 from src.training.trainer_baseline import Trainer
 
 
@@ -19,12 +20,14 @@ def set_seed(seed: int):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Train ViT-B/16 baseline on CUB-200")
+    parser = argparse.ArgumentParser(
+        description="Train ViT-B/16 with shallow VPT on CUB-200"
+    )
     parser.add_argument(
         "--config",
         type=str,
         required=True,
-        help="Path to YAML config file (e.g., src/configs/cub_baseline.yaml)",
+        help="Path to YAML config file (e.g., src/configs/cub_vpt_shallow.yaml)",
     )
     return parser.parse_args()
 
@@ -36,11 +39,12 @@ def main():
     with open(args.config, "r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
 
-    exp_name = cfg.get("experiment_name", "cub_vit_baseline")
+    exp_name = cfg.get("experiment_name", "cub_vpt_shallow")
     output_dir = cfg.get("output_dir", os.path.join("outputs", exp_name))
 
     dataset_cfg = cfg.get("dataset", {})
     train_cfg = cfg.get("training", {})
+    model_cfg = cfg.get("model", {})
 
     # 2. Seed
     seed = train_cfg.get("seed", 42)
@@ -53,9 +57,9 @@ def main():
     else:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    print(f"[Main] Using device: {device}")
+    print(f"[Main] VPT: Using device: {device}")
 
-    # 4. Datasets & DataLoaders
+    # 4. Dataset & DataLoaders
     root = dataset_cfg.get("root", "data/cub200/CUB_200_2011")
     image_size = dataset_cfg.get("image_size", 224)
 
@@ -72,6 +76,16 @@ def main():
 
     batch_size = train_cfg.get("batch_size", 16)
     num_workers = train_cfg.get("num_workers", 0)
+
+    # Windows safety: no DataLoader multiprocessing (avoids shm.dll issues)
+    if platform.system() == "Windows":
+        if num_workers != 0:
+            print(
+                f"[Main] VPT: Overriding num_workers={num_workers} -> 0 on Windows "
+                "to avoid CUDA DLL spawn errors."
+            )
+        num_workers = 0
+
     pin_memory = device.type == "cuda"
 
     train_loader = DataLoader(
@@ -90,10 +104,15 @@ def main():
         pin_memory=pin_memory,
     )
 
-    # 5. Model
-    model = ViTBaseline(
-        num_classes=200,       # CUB-200 dataset
-        pretrained=True,
+    # 5. Model (VPT shallow)
+    num_classes = model_cfg.get("num_classes", 200)
+    num_prompts = model_cfg.get("num_prompts", 10)
+    pretrained = model_cfg.get("pretrained", True)
+
+    model = ViTVPTShallow(
+        num_classes=num_classes,
+        num_prompts=num_prompts,
+        pretrained=pretrained,
     )
 
     # 6. Trainer + TensorBoard

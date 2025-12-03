@@ -1,0 +1,87 @@
+============================================================
+Comparison: Baseline ViT-B/16 vs. VPT-Shallow vs. VPT-Deep
+Dataset: CUB-200-2011
+Backbone: ViT-B/16
+============================================================
+
+### ✔ Model Summary
+------------------------------------------------------------
+1. Baseline ViT-B/16
+   - Full fine-tuning (all 86M parameters trainable)
+   - Highest computational cost
+   - Prone to heavy overfitting
+
+2. VPT-Shallow
+   - Frozen ViT backbone
+   - ~10K trainable prompt parameters
+   - Prompts injected only at the input layer
+
+3. VPT-Deep
+   - Frozen ViT backbone
+   - ~200K trainable parameters (more prompts across multiple layers)
+   - Higher capacity than shallow prompting
+
+============================================================
+### ✔ Accuracy Comparison (Validation Set)
+------------------------------------------------------------
+| Model            | Train Acc | Val Acc | Trainable Params |
+|------------------|-----------|----------|-------------------|
+| Baseline ViT-B/16 | ~98–99%   | **36–37%** | ~86,000,000       |
+| VPT-Shallow       | ~96–97%   | **86–87%** | ~10,000           |
+| VPT-Deep          | ~99–100%  | **86.3–86.7%** | ~200,000        |
+
+============================================================
+### ✔ Key Insights
+------------------------------------------------------------
+• **VPT-Shallow provides the best generalization**:
+  - Highest stability
+  - Best validation accuracy
+  - Lowest overfitting
+  - ~1000× fewer parameters than full fine-tuning
+
+• **Baseline ViT-B/16 fails to generalize**:
+  - Nearly perfect training accuracy (99%)
+  - Extremely poor validation accuracy (36–37%)
+  - Strong overfitting due to small dataset
+
+• **VPT-Deep does not outperform VPT-Shallow**:
+  - Reaches 100% training accuracy → slight overfitting
+  - Validation accuracy nearly identical to shallow
+  - Additional prompt layers offer no improvement on CUB-200
+
+============================================================
+### ✔ Overfitting Behavior
+------------------------------------------------------------
+• Baseline: Severe overfitting after a few epochs  
+• VPT-Shallow: Minimal overfitting, smooth training  
+• VPT-Deep: Slight overfitting (train 100%, val fluctuates slightly)
+
+============================================================
+### ✔ Parameter Efficiency
+------------------------------------------------------------
+| Model        | Trainable Params | Reduction vs. Baseline |
+|--------------|------------------|--------------------------|
+| Baseline     | 86,000,000       | —                        |
+| VPT-Shallow  | 10,000           | **~8600× fewer**         |
+| VPT-Deep     | 200,000          | **~430× fewer**          |
+
+VPT methods drastically reduce the number of trainable parameters.
+
+============================================================
+### ✔ Final Conclusion
+------------------------------------------------------------
+**VPT-Shallow is the optimal method for this project.**
+
+It provides:
+• The highest validation accuracy  
+• The best generalization  
+• The smallest number of trainable parameters  
+• The most stable training curves  
+
+VPT-Deep offers more capacity but **does not improve performance** on CUB-200.
+
+The Baseline ViT-B/16 demonstrates that **full fine-tuning is not suitable** for small fine-grained datasets.
+
+============================================================
+End of Comparison
+============================================================

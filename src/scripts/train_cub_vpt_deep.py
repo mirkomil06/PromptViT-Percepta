@@ -1,5 +1,4 @@
 import os
-from xml.parsers.expat import model
 import yaml
 import random
 import argparse
@@ -8,7 +7,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from src.datasets.cub200 import CUB200Dataset
-from src.models.vit_vpt_shallow import ViTVPTShallow
+from src.models.vit_vpt_deep import ViTVPTDeep
 from src.training.trainer_baseline import Trainer
 
 
@@ -23,7 +22,7 @@ def parse_args():
     parser.add_argument(
         "--config",
         type=str,
-        default="src/configs/cub_vpt_shallow.yaml",
+        default="src/configs/cub_vpt_deep.yaml",
         help="Path to YAML config file"
     )
     return parser.parse_args()
@@ -32,10 +31,11 @@ def parse_args():
 def main():
     args = parse_args()
 
+    # === LOAD CONFIG ===
     with open(args.config, "r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
 
-    experiment_name = cfg.get("experiment_name", "cub_vpt_shallow")
+    experiment_name = cfg.get("experiment_name", "cub_vpt_deep")
     output_dir = cfg.get("output_dir", f"outputs/{experiment_name}")
 
     dataset_cfg = cfg["dataset"]
@@ -44,8 +44,9 @@ def main():
 
     set_seed(train_cfg.get("seed", 42))
 
-    device = torch.device("cpu")
-    print("[Main] VPT: Running on CPU only.")
+    # === DEVICE ===
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"[Main] VPT-Deep: Using device: {device}")
 
     # === DATASETS ===
     root = dataset_cfg["root"]
@@ -58,7 +59,7 @@ def main():
         train_dataset,
         batch_size=train_cfg["batch_size"],
         shuffle=True,
-        num_workers=train_cfg.get("num_workers", 4),
+        num_workers=train_cfg.get("num_workers", 0),
         pin_memory=True
     )
 
@@ -66,16 +67,16 @@ def main():
         val_dataset,
         batch_size=train_cfg["batch_size"],
         shuffle=False,
-        num_workers=train_cfg.get("num_workers", 4),
+        num_workers=train_cfg.get("num_workers", 0),
         pin_memory=True
     )
 
-    # === MODEL (VPT-Shallow) ===
+    # === MODEL (VPT-Deep) ===
     num_classes = model_cfg.get("num_classes", 200)
     num_prompts = model_cfg.get("num_prompts", 10)
     pretrained = model_cfg.get("pretrained", True)
 
-    model = ViTVPTShallow(
+    model = ViTVPTDeep(
         num_classes=num_classes,
         num_prompts=num_prompts,
         pretrained=pretrained,

@@ -73,7 +73,10 @@ cd PromptViT-Percepta
 ### 2. (Optional) Create a virtual environment
 ```bash
 python -m venv .venv
-source .venv/bin/activate      # Windows: .venv\Scripts\activate
+# Windows:
+.venv\Scripts\activate
+# macOS / Linux:
+source .venv/bin/activate
 ```
 
 ### 3. Install dependencies
@@ -97,25 +100,48 @@ data/
         ├── valid/
         └── test/
 ```
+*(The Cars/Flowers datasets are not yet in use, but the structure is prepared for future expansion.)*
 
-### 5. Train the baseline model (Week 3)
+### 5. Train the Baseline ViT-B/16 Model (Week 3)
 ```bash
 python -m src.scripts.train_cub_baseline --config src/configs/cub_baseline.yaml
 ```
+This trains a fully fine-tuned ViT-B/16 model. CUDA will be used automatically if available.
 
-### 6. Train the VPT-Shallow model (Week 4)
+### 6. Train the VPT-Shallow Model (Week 4)
 ```bash
-python -m src.scripts.train_cub_vpt --config src/configs/cub_vpt_shallow.yaml
+python -m src.scripts.train_cub_vpt_shallow --config src/configs/cub_vpt_shallow.yaml
 ```
+This trains the Visual Prompt Tuning (VPT-Shallow) model with:
+- Frozen ViT backbone
+- Trainable prompts
+- Trainable classification head
 
-### 7. Run inference on a single image (Baseline model)
+### 7. Train the VPT-Deep Model (Week 4)
 ```bash
-python -m src.scripts.infer_cub_baseline --image "data/cub200/CUB_200_2011/images/...jpg"
+python -m src.scripts.train_cub_vpt_deep --config src/configs/cub_vpt_deep.yaml
 ```
-This will output the predicted class and confidence score.
+This trains the Visual Prompt Tuning (VPT-Deep) model with:
+- Frozen ViT backbone
+- Deep trainable prompts injected into multiple Transformer layers
+- Trainable classification head
+- Higher prompt capacity compared to VPT-Shallow
 
-### 8. (Optional) VPT inference
-A dedicated script for VPT inference (`infer_cub_vpt.py`) will be added in **Week 5**.
+### 8. Run Inference (Baseline)
+```bash
+python -m src.scripts.infer_cub_baseline --image "data/cub200/CUB_200_2011/images/<your-image>.jpg"
+```
+Outputs:
+- Predicted class
+- Confidence score
+
+### 9. (Optional) VPT Inference
+A VPT inference script (*infer_cub_vpt.py*) will be added in Week 5.
+
+### 10. Visualize Training with TensorBoard
+```bash
+tensorboard --logdir outputs --port 6006
+```
 
 ---
 
@@ -127,6 +153,8 @@ PromptViT-Percepta/
 ├── README.md
 ├── ROADMAP.md
 ├── requirements.txt
+├── .gitignore
+├── CV25_PromptViT_Percepta_Percepta.pdf
 │
 ├── References/
 │    ├── AN IMAGE IS WORTH 16X16 WORDS.pdf
@@ -138,83 +166,180 @@ PromptViT-Percepta/
 ├── data/ # datasets (not included due to size)
 │
 ├── results/
-│    ├── cub_baseline_cpu.txt
-│    └── cub_vpt_shallow_cpu.txt
+│    ├── cub_baseline.txt
+│    ├── cub_vpt_shallow.txt
+│    ├── cub_vpt_deep.txt
+│    └── comparison_baseline_vs_vpt_shallow_vs_vpt_deep.txt
 │
 ├── outputs/
-│    ├── cub_baseline_cpu/
+│    ├── README.md
+│    ├── cub_baseline/
+│    │   ├── logs/
+│    │   ├── README.md
 │    │   └── best_model.pth
-│    └── cub_vpt_shallow/
+│    ├── cub_vpt_shallow/
+│    │   ├── logs/
+│    │   ├── README.md
+│    │   └── best_model.pth
+│    └── cub_vpt_deep/
+│        ├── logs/
+│        ├── README.md
 │        └── best_model.pth
 │
 └── src/
     ├── configs/
     │    ├── cub_baseline.yaml
-    │    └── cub_vpt_shallow.yaml
+    │    ├── cub_vpt_shallow.yaml
+    │    └── cub_vpt_deep.yaml
     ├── datasets/
     │    └── cub200.py
     ├── models/
     │    ├── vit_baseline.py
-    │    └── vit_vpt_shallow.py
+    │    ├── vit_vpt_shallow.py 
+    │    └── vit_vpt_deep.py
     ├── training/
     │    └── trainer_baseline.py
     └── scripts/
          ├── train_cub_baseline.py
          ├── infer_cub_baseline.py
-         └── train_cub_vpt.py
+         ├── train_cub_vpt_shallow.py 
+         └── train_cub_vpt_deep.py
 ```
 
 ---
 
-## 📊 Baseline Results (Week 3)
-
+## 📊 Baseline Results — ViT-B/16 (Full Fine-Tuning) Week 3
 **Model:** ViT-B/16 (timm, pretrained on ImageNet-21k → 1k)  
-**Training Device:** CPU  
-**Epochs:** 5  
+**Training Device:** GPU (CUDA)  
+**Epochs:** 60  
 **Dataset:** CUB-200-2011  
 
-| Epoch | Validation Accuracy |
-|-------|----------------------|
-| 1 | 1.40% |
-| 2 | 3.94% |
-| 3 | 6.83% |
-| 4 | 10.10% |
-| 5 | **13.62%** |
+### 📌 Performance Summary
 
-**Best Validation Accuracy:** 13.62%  
-**Checkpoint Saved:** outputs/cub_baseline_cpu/best_model.pth
+| Metric | Value |
+|--------|--------|
+| Train Accuracy | ~98–99% |
+| Validation Accuracy | **~36–37%** |
+| Best Validation Accuracy | **~36.7%** |
+| Trainable Parameters | ~86M |
+
+**Checkpoint Saved:**  
+`outputs/cub_baseline/best_model.pth`
 
 ---
 
 ### 📝 Notes
-- Low accuracy is expected because:
-  - training was done **only for 5 epochs**
-  - training was on **CPU**
-  - ViT-B/16 is a **large model (~86M params)**  
-- With more epochs + GPU, accuracy will improve significantly.
+
+- The baseline shows **severe overfitting**:  
+  - Training accuracy reaches ~99%  
+  - Validation accuracy remains very low  
+- Full fine-tuning of ViT-B/16 is **not suitable** for small fine-grained datasets like CUB-200.  
+- Even with long GPU training, validation accuracy does **not exceed ~37%**.  
+- Serves as an important comparison point for VPT methods.
 
 ---
 
-## 🌱 Prompt-Tuning Results (Week 4 — VPT-Shallow)
+### ❗ Why the Baseline Performs Poorly
+
+- ViT-B/16 has **~86 million trainable parameters**  
+- CUB-200 dataset is **too small** for stable full fine-tuning  
+- Fine-grained recognition requires subtle distinctions (colors, beaks, wings, patterns)  
+- The model memorizes training images but **fails to generalize**
+
+---
+
+## 🌱 Prompt-Tuning Results — VPT-Shallow (ViT-B/16) Week 4
 
 **Method:** Visual Prompt Tuning (VPT-Shallow)  
 **Backbone:** ViT-B/16 (frozen)  
-**Trainable Parts:** Prompt tokens + classification head  
-**Device:** CPU  
-**Epochs:** 5  
+**Trainable Parts:** 10 prompt tokens + classification head  
+**Training Device:** GPU (CUDA)  
+**Epochs:** 30  
 **Dataset:** CUB-200-2011  
 
-| Model                     | Trainable Parameters        | Epochs | Best Val Accuracy |
-|---------------------------|-----------------------------|--------|-------------------|
-| Baseline ViT-B/16 (full) | ~86M (all weights)          | 5      | 13.62%            |
-| VPT-Shallow (10 prompts) | << 86M (prompts + head)     | 5      | **80.48%**        |
+### 📌 Performance Summary
+
+| Model                     | Trainable Parameters | Best Val Accuracy |
+|---------------------------|----------------------|-------------------|
+| Baseline ViT-B/16        | ~86M                 | ~36–37%           |
+| **VPT-Shallow (10 prompts)** | **~10K**              | **~86–87%**        |
 
 ### 🧾 Notes
-- The ViT-B/16 backbone remains **fully frozen** during training.  
-- The only trainable components are:  
-  - the **prompt embeddings** (10 learnable tokens),  
-  - the **new classification head** (200 classes).  
-- Even on CPU and with only 5 epochs of training, VPT-Shallow provides a **massive accuracy boost** for fine-grained visual recognition.
+
+- The ViT-B/16 backbone is **fully frozen** during training, ensuring strong generalization.
+- Only the **prompt embeddings** and the **classification head** are optimized.
+- Training is **highly stable** with no signs of overfitting.
+- Validation accuracy surpasses the baseline by **+50 percentage points**.
+- Results closely match the accuracy reported in the official VPT research paper.
+
+### ✔ Why VPT-Shallow Works So Well
+
+- Prompt tokens function as **task-specific adapters**, guiding the frozen transformer.
+- Far fewer parameters (~10K) reduce the risk of overfitting.
+- ViT pretrained features remain intact, which is crucial for small datasets like CUB-200.
+- Perfect fit for **fine-grained recognition** tasks.
+
+---
+
+### 🟣 Conclusion
+
+VPT-Shallow achieves **state-of-the-art performance** on CUB-200 while training only a tiny fraction of parameters.
+
+Compared to full fine-tuning:
+- **+50% improvement** in validation accuracy  
+- **~1000× fewer trainable parameters**  
+- **More stable** learning curves  
+- **Better generalization**  
+
+**VPT-Shallow is the recommended method for this project.**
+
+---
+
+## 🔥 Prompt-Tuning Results — VPT-Deep (ViT-B/16) Week 4
+
+**Method:** Visual Prompt Tuning (VPT-Deep)  
+**Backbone:** ViT-B/16 (frozen)  
+**Trainable Parts:** Deep prompt tokens (multiple layers) + classification head  
+**Training Device:** GPU (CUDA)  
+**Epochs:** 30  
+**Dataset:** CUB-200-2011  
+
+### 📌 Performance Summary
+
+| Model                     | Trainable Parameters | Best Val Accuracy |
+|---------------------------|----------------------|-------------------|
+| Baseline ViT-B/16        | ~86M                 | ~36–37%           |
+| VPT-Shallow (10 prompts) | ~10K                 | ~86–87%           |
+| **VPT-Deep (multi-layer)** | **~200K**             | **~86.3–86.7%**     |
+
+### 🧾 Notes
+
+- Deep prompts are injected into **multiple transformer layers**, giving the model higher capacity.  
+- The ViT backbone remains **fully frozen**, preserving pretrained representations.  
+- Training accuracy reaches **~100%**, showing mild overfitting.  
+- Validation accuracy remains **on par with VPT-Shallow**, not higher.  
+- Behavior matches the original VPT paper:  
+  **shallow prompting often generalizes better than deep prompting on small datasets.**
+
+### ✔ Why VPT-Deep Behaves This Way
+
+- More prompt layers → more parameters → higher capacity → **more overfitting risk**.  
+- CUB-200 is small, making deeper prompting **unnecessary**.  
+- VPT-Shallow provides a natural regularization effect due to fewer parameters.  
+- Deep prompting modifies intermediate transformer layers more aggressively, which can hurt generalization.
+
+---
+
+### 🟠 Conclusion
+
+VPT-Deep is a strong method, but on CUB-200:
+
+- It **does not outperform VPT-Shallow**  
+- Validation accuracy is nearly identical (~86–87%)  
+- Training curves are **slightly noisier**  
+- Parameter count is significantly higher (~200K vs ~10K)
+
+**VPT-Shallow remains the recommended approach for this project.**
 
 ---
 
@@ -272,25 +397,39 @@ Goal: Provide **faithful, human-understandable** explanations of model predictio
 
 ## 📅 Project Roadmap
 
-| Week | Dates | Milestone | Status |
-|------|--------|-----------|---------|
-| **Week 1** | Oct 14–21 | Repo setup, topic confirmation | ✅ Completed |
-| **Week 2** | Oct 21–27 | Literature review + dataset preparation | ✅ Completed |
-| **Week 3** | Oct 28–Nov 3 | Baseline ViT-B/16 training on CUB-200 | ✅ Completed |
-| **Week 4** | Nov 4–10 | Prompt-tuning implementation (VPT-Deep / VPT-Shallow) | ✅ Completed |
-| **Week 5** | Nov 11–17 | Explainability module (Prompt-CAM, attention rollout) | ⏳ In progress |
-| **Week 6** | Nov 18–24 | Evaluation (Accuracy, F1, Pointing Game) | ⏳ Upcoming |
-| **Week 7** | Nov 25–Dec 1 | Report writing & presentation slides | ⏳ Upcoming |
-| **Week 8** | Dec 2–8 | Final cleanup & project presentation | ⏳ Upcoming |
+| Week | Dates       | Milestone                                               | Status        |
+|------|-------------|----------------------------------------------------------|---------------|
+| **Week 1** | Oct 14–21 | Repository setup, project definition                     | ✅ Completed   |
+| **Week 2** | Oct 21–27 | Literature review + dataset preparation                 | ✅ Completed   |
+| **Week 3** | Oct 28–Nov 3 | Baseline ViT-B/16 (full fine-tuning) on CUB-200         | ✅ Completed   |
+| **Week 4** | Nov 4–10 | Visual Prompt Tuning (VPT-Shallow & VPT-Deep) implemented | ✅ Completed   |
+| **Week 5** | Nov 11–17 | Explainability module (Prompt-CAM, Attention Rollout)    | ⏳ In progress |
+| **Week 6** | Nov 18–24 | Evaluation metrics (Accuracy, F1, Pointing Game)         | ⏳ Upcoming    |
+| **Week 7** | Nov 25–Dec 1 | Report writing & slide preparation                      | ⏳ Upcoming    |
+| **Week 8** | Dec 2–8  | Final polishing & project presentation                     | ⏳ Upcoming    |
 
-🗂️ [**ROADMAP.md**](./ROADMAP.md) file will include weekly progress updates and issue tracking.
+🗂️ See **[ROADMAP.md](./ROADMAP.md)** for weekly updates, tasks, and issue tracking.
+
+---
 
 ### 🔄 Progress Summary
 
-- Week 1–3: **Core pipeline completed**  
-- Week 4: **Prompt-Tuning (VPT-Shallow) completed — 80.48% val accuracy**  
-- Week 5: Starting work on **Explainability (Prompt-CAM + Attention Rollout)**  
-- Next: Evaluation → report → presentation
+- **Weeks 1–3:**  
+  ✔ Core pipeline complete (dataset loader, baseline ViT, training scripts)
+
+- **Week 4:**  
+  ✔ Visual Prompt Tuning completed  
+  ✔ **VPT-Shallow:** ~86–87% validation accuracy  
+  ✔ **VPT-Deep:** ~86.3–86.7% validation accuracy
+
+- **Week 5:**  
+  🔄 Currently implementing **Prompt-CAM + Attention Rollout**  
+  🔄 Preparing the explainability module for CUB-200 examples
+
+- **Next Steps:**  
+  → Model evaluation (Week 6)  
+  → Final report and presentation (Weeks 7–8)
+
 ---
 
 ## 👥 Team Percepta
@@ -307,105 +446,163 @@ We work together to build an explainable and efficient Vision Transformer–base
 
 ## 🛠️ Tech Stack
 
-- **Python 3.13**
-- **PyTorch** — deep learning framework  
-- **timm** — Vision Transformer (ViT-B/16) implementation  
-- **Pillow / torchvision** — image loading & preprocessing  
-- **Matplotlib** — visualizations and plots  
-- **tqdm** — progress bars for training  
-- **Visual Studio Code** — main development environment  
+### 🔧 Core Languages & Frameworks
+- **Python 3.11** — main development language  
+- **PyTorch** — deep learning framework (training, inference, CUDA acceleration)  
+- **timm** — Vision Transformer (ViT-B/16) backbone + pretrained weights  
+
+### 🖼️ Data & Image Processing
+- **torchvision** — datasets, transforms, augmentation  
+- **Pillow (PIL)** — image loading/format support  
+
+### 📊 Visualization & Logging
+- **TensorBoard** — training curves (loss/accuracy)  
+- **Matplotlib** — plots, visualizations, explainability figures  
+
+### ⚙️ Utilities & Training Tools
+- **tqdm** — progress bars  
+- **PyYAML** — configuration files (`*.yaml`)  
+- **NumPy** — numeric operations  
+- **scikit-learn** — metrics (accuracy, F1, confusion matrix)  
+
+### 🧑‍💻 Development Environment
+- **Visual Studio Code** — IDE  
+- **Git / GitHub** — version control & repository hosting  
 
 ---
 
 ## ⚖️ Ethics & Compliance
 
-- All datasets used in this project (**CUB-200-2011**, **Stanford Cars**, **Oxford Flowers-102**) are publicly available and intended for academic research.
-- The project does **not collect**, **store**, or **process** any personal or sensitive information.
-- All model outputs and visualizations are used strictly for educational and research purposes.
-- The code and methods follow standard practices in the machine learning and computer vision community.
-- All referenced papers and datasets are cited and credited to their original authors.
+- All datasets used in this project (**CUB-200-2011**, **Stanford Cars**, **Oxford Flowers-102**) are **public, academic datasets** intended strictly for research and non-commercial use.
+- The project does **not collect**, **store**, or **process** any personal, sensitive, or user-identifiable information.
+- All model outputs, visualizations, and explainability analyses are produced solely for **educational and research** purposes.
+- The training pipeline, evaluation workflow, and experimental methodology follow widely accepted standards in the **machine learning** and **computer vision** community.
+- All external resources — datasets, papers, and pretrained models — are **properly credited and attributed** to their original authors in accordance with academic best practices.
+- The project does not aim to deploy models in real-world decision-making systems; all work remains in the scope of **responsible academic experimentation**.
 
 ---
 
 ## 📈 Expected Outcomes
 
-By the end of the project, we aim to deliver:
+By the end of this project, the following deliverables will be completed:
 
-- A fully trained **baseline ViT-B/16** model on fine-grained datasets  
-- A **prompt-tuned Vision Transformer** (VPT-Deep / VPT-Shallow) with <1% trainable parameters  
-- Explainability visualizations using **Prompt-CAM** and **attention rollout**  
-- Evaluation metrics:
-  - Accuracy  
-  - F1-score  
-  - Pointing Game (interpretability metric)  
-- A clean and reproducible codebase with clear configuration files  
-- A final **PDF report** and a **presentation** summarizing the project workflow and results  
+### 🧠 Models
+- A fully trained **baseline ViT-B/16** model on fine-grained classification tasks.
+- Two prompt-tuned Vision Transformer variants:
+  - **VPT-Shallow** (best generalization, ~10K trainable parameters)
+  - **VPT-Deep** (multi-layer prompting, ~200K trainable parameters)
+- All models trained with reproducible **YAML configurations**.
+
+### 🔍 Explainability
+- Visual explanation methods integrated into the pipeline:
+  - **Prompt-CAM** (prompt-aware class activation maps)
+  - **Attention Rollout** (transformer interpretability)
+- Side-by-side visual comparisons across Baseline / VPT-Shallow / VPT-Deep.
+
+### 📊 Evaluation
+- Quantitative evaluation on CUB-200:
+  - **Accuracy**
+  - **F1-score**
+  - **Pointing Game** (spatial interpretability metric)
+- Qualitative evaluation using visual attention maps.
+
+### 🛠️ Codebase & Reproducibility
+- A clean, modular, research-grade codebase:
+  - Dataset loaders
+  - ViT baseline implementation
+  - VPT modules
+  - Explainability scripts
+  - Training and inference pipelines
+- Fully reproducible experiments via configuration files (`*.yaml`) and TensorBoard logs.
+
+### 📄 Final Deliverables
+- A complete **PDF research report** detailing:
+  - Motivation
+  - Methodology
+  - Experiments
+  - Results
+  - Limitations & future work
+- A polished **presentation deck** summarizing the entire project workflow and findings.
 
 ---
 
 ## 🔬 Experiments & Evaluation
 
-Our experiments are designed to compare three major components:
+The experimental pipeline is designed to compare three major components:
 
-1. **Baseline ViT-B/16 fine-tuning**  
-2. **Prompt-Tuned ViT (VPT-Deep / VPT-Shallow)**  
-3. **Explainability quality (Prompt-CAM & attention rollout)**
+1. **Baseline ViT-B/16 fine-tuning**
+2. **Prompt-Tuned ViT models (VPT-Shallow & VPT-Deep)**
+3. **Explainability quality using Prompt-CAM and Attention Rollout**
 
-### **1️⃣ Experiment Setups**
+---
+
+## 1️⃣ Experiment Setups
 
 | Experiment | Description | Status |
 |-----------|-------------|--------|
 | **E1 — Baseline ViT Training** | Full fine-tuning of ViT-B/16 on CUB-200 | ✅ Completed |
-| **E2 — Prompt-Tuning (VPT-Deep)** | Add deep prompt tokens, freeze backbone | ⏳ Planned |
-| **E3 — Prompt-Tuning (VPT-Shallow)** | Add prompts only to the first layer | ✅ Completed |
-| **E4 — Explainability Evaluation** | Generate Prompt-CAM & attention rollout | ⏳ Planned |
-| **E5 — Pointing Game Metric** | Evaluate interpretability quality | ⏳ Planned |
-| **E6 — Cross-dataset Generalization** | Evaluate CUB-trained model on Cars/Flowers | ⏳ Planned |
+| **E2 — Prompt-Tuning (VPT-Shallow)** | Insert shallow prompt tokens (first layer only) | ✅ Completed |
+| **E3 — Prompt-Tuning (VPT-Deep)** | Insert deep prompts across multiple transformer layers | ✅ Completed |
+| **E4 — Explainability Module** | Generate Prompt-CAM & Attention Rollout | ⏳ In progress |
+| **E5 — Pointing Game Metric** | Evaluate interpretability quantitatively | ⏳ Planned |
+| **E6 — Cross-Dataset Evaluation** | Test generalization on Cars / Flowers | ⏳ Planned |
 
-### **2️⃣ Evaluation Metrics**
+---
 
-We evaluate models on both **accuracy** and **interpretability**:
+## 2️⃣ Evaluation Metrics
 
-#### **Classification Metrics**
+We evaluate models across **classification quality** and **interpretability quality**.
+
+### 🔵 Classification Metrics
 - **Top-1 Accuracy**
 - **F1-score**
 - **Confusion Matrix**
+- **Train vs. Validation Curves**
 
-#### **Interpretability Metrics**
-- **Pointing Game** (localization accuracy)
-- **CAM heatmap quality** (qualitative)
-- **Attention Rollout visualization**
+### 🔴 Interpretability Metrics
+- **Pointing Game** (localization accuracy using heatmaps)
+- **Prompt-CAM quality** (qualitative)
+- **Attention Rollout maps**
+- **Comparison of attention regions across models**
 
-### **3️⃣ Comparison Strategy**
+---
 
-We will compare:
+## 3️⃣ Comparison Strategy
 
-| Model | Trainable Params | Expected Behavior |
-|-------|------------------|------------------|
-| **ViT-B/16 (full fine-tuning)** | ~86M | Highest accuracy, slow training |
-| **VPT-Shallow** | <1% params | Lightweight, stable, strong performance |
-| **VPT-Deep** | <1% params | Potentially best performance for complex datasets |
-| **Frozen ViT (no prompts)** | ~0 trainable | Weak baseline |
+Our goal is to understand how prompt tuning improves both accuracy and interpretability.
 
-This comparison will show the **benefit of prompt tuning** vs full fine-tuning.
+| Model | Trainable Parameters | Expected Behavior |
+|-------|----------------------|------------------|
+| **ViT-B/16 (full fine-tuning)** | ~86M | Overfits on small datasets; moderate validation accuracy |
+| **VPT-Shallow** | ~10K | Best generalization on CUB-200; ~86–87% accuracy |
+| **VPT-Deep** | ~200K | Similar accuracy to VPT-Shallow; slightly higher overfitting risk |
+| **Frozen ViT (no prompts)** | ~0 | Very weak baseline (for sanity checks) |
 
-### **4️⃣ Datasets for Evaluation**
+The comparison highlights how **prompt tuning outperforms full fine-tuning** with **1000× fewer parameters**.
 
-- **CUB-200-2011** → main dataset for all experiments  
-- **Stanford Cars** → cross-dataset generalization test  
-- **Oxford Flowers-102** → interpretability test (CAMs look very clear)
+---
 
-### **5️⃣ Deliverables per Experiment**
+## 4️⃣ Datasets for Evaluation
 
-Each experiment will produce:
+- **CUB-200-2011** — primary fine-grained dataset (birds)  
+- **Stanford Cars** — cross-dataset generalization test  
+- **Oxford Flowers-102** — ideal for explainability visualization (CAMs look very clean)
 
-- Training logs  
-- Validation curves  
-- Best checkpoint  
-- Visual explainability maps  
-- Metric comparison tables  
+---
 
-This ensures full reproducibility and clarity in final reporting.
+## 5️⃣ Deliverables per Experiment
+
+Each experiment will generate:
+
+- ✔ Training & validation logs (TensorBoard)  
+- ✔ Best model checkpoint (`best_model.pth`)  
+- ✔ Accuracy/F1 metrics  
+- ✔ Confusion matrix  
+- ✔ Prompt-CAM heatmaps  
+- ✔ Attention rollout maps  
+- ✔ Summary tables comparing Baseline vs. VPT models  
+
+This ensures full reproducibility and clear documentation for the final report.
 
 ---
 

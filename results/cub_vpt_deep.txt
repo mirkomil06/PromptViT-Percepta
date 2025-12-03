@@ -1,0 +1,57 @@
+============================================================
+Experiment: VPT-Deep (ViT-B/16 + Deep Prompt Tuning)
+Dataset: CUB-200-2011
+Model: Frozen ViT-B/16 backbone + prompts injected into multiple transformer layers
+Trainable Parameters: ~200K (approx.)
+============================================================
+
+✔ Training Summary
+------------------------------------------------------------
+• Total Epochs: 30
+• Optimizer: AdamW
+• Learning Rate: 3e-4
+• Weight Decay: 0.01
+• Input Size: 224×224
+• Prompt Depth: Multi-layer injection (Deep variant)
+• Backbone: Fully frozen
+• Classification Head: Trainable
+
+✔ Performance
+------------------------------------------------------------
+• Final Training Accuracy: ~99–100%
+• Final Validation Accuracy: ~86.3–86.7%
+• Best Validation Accuracy: ~86.7%
+• Final Training Loss: very low (model memorizes training set)
+• Final Validation Loss: slightly higher than VPT-Shallow
+
+✔ Observations
+------------------------------------------------------------
+• The model reaches nearly 100% training accuracy — signs of slight overfitting.
+• Validation accuracy does not exceed VPT-Shallow, despite more trainable prompts.
+• Training remains stable but shows larger oscillations in validation loss.
+• Results match findings in the VPT paper: deep prompts do not always help and
+  may reduce generalization on smaller datasets like CUB-200.
+
+✔ Why It Behaves This Way
+------------------------------------------------------------
+• Deeper prompt injections give the model more capacity to memorize the training set.
+• CUB-200 is too small for deep prompting to provide meaningful improvement.
+• VPT-Shallow often generalizes better because it:
+  - introduces fewer parameters,
+  - regularizes the model naturally,
+  - avoids modifying deeper transformer representations too aggressively.
+
+============================================================
+Conclusion
+------------------------------------------------------------
+VPT-Deep performs strongly on CUB-200 but does not surpass VPT-Shallow.
+
+Compared to VPT-Shallow:
+• Similar validation accuracy (~86–87%)
+• Higher chance of overfitting
+• More trainable parameters (~200K)
+• Slightly noisier validation curves
+
+VPT-Deep is effective but not optimal for this dataset.
+VPT-Shallow remains the recommended method for fine-grained classification.
+============================================================

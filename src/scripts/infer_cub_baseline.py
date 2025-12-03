@@ -36,12 +36,12 @@ def load_image(image_path, image_size=224):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--image", required=True, help="Path to image.jpg")
-    parser.add_argument("--model", default="outputs/cub_baseline_cpu/best_model.pth")
+    parser.add_argument("--model", default="outputs/cub_baseline/best_model.pth")
     parser.add_argument("--cub_root", default="data/cub200/CUB_200_2011")
     args = parser.parse_args()
 
-    device = torch.device("cpu")
-    print("[Infer] Running on CPU.")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"[Infer] Using device: {device}")
 
     # 1. Загрузка модели
     print("[Infer] Loading model...")
