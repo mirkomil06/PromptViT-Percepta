@@ -1,13 +1,13 @@
 # PromptViT-Percepta
 
-[![Python](https://img.shields.io/badge/Python-3.13-blue.svg)]()
+[![Python](https://img.shields.io/badge/Python-3.11-blue.svg)]()
 [![PyTorch](https://img.shields.io/badge/Framework-PyTorch-red.svg)]()
 [![License](https://img.shields.io/badge/License-Academic%20Use-green.svg)]()
 [![Status](https://img.shields.io/badge/Status-In%20Progress-yellow.svg)]()
 
-Prompt-Tuned Vision Transformers (ViTs) for Explainable Fine-Grained Recognition.
+**Prompt-Tuned Vision Transformers (ViTs) for Explainable Fine-Grained Recognition**
 
-This project explores prompt-tuned Vision Transformers for fine-grained image classification (birds, cars, flowers) with a focus on model **interpretability** using attention-based visual explanations.
+This project investigates **parameter-efficient adaptation** of Vision Transformers using **Visual Prompt Tuning (VPT)** for fine-grained classification tasks (e.g., bird species, car models, flower categories). Alongside high accuracy, the project emphasizes **interpretability**, applying techniques such as Prompt-CAM and attention rollout for meaningful visual explanations.
 
 > Course: Computer Vision (Fall 2025), Central Asian University  
 > Team: Percepta
@@ -15,25 +15,27 @@ This project explores prompt-tuned Vision Transformers for fine-grained image cl
 ---
 
 # 📑 Table of Contents
-1. [Project Overview](#-project-overview)  
-2. [Objectives](#-objectives)  
-3. [Quickstart](#-quickstart)  
-4. [Repository Structure](#-repository-structure)  
-5. [Baseline Results (Week 3)](#-baseline-results-week-3)  
-6. [Prompt-Tuning Results (Week 4 — VPT-Shallow)](#-prompt-tuning-results-week-4--vpt-shallow)
-7. [Datasets Used](#-datasets-used)  
-8. [Methodology](#-methodology)  
-9. [Project Roadmap](#-project-roadmap)  
-10. [Team](#-team-percepta)  
-11. [Tech Stack](#-tech-stack)  
-12. [Ethics & Compliance](#-ethics--compliance)  
-13. [Expected Outcomes](#-expected-outcomes)  
-14. [Experiments & Evaluation](#-experiments--evaluation)  
-15. [References](#-references)  
-16. [License](#-license)  
-17. [Repository Link](#-repository-link)
+1. [Project Overview](#project-overview)
+2. [Objectives](#objectives)
+3. [Quickstart](#quickstart)
+4. [Repository Structure](#repository-structure)
+5. [Baseline Results (Week 3)](#baseline-results-week-3)
+6. [Prompt-Tuning Results (Week 4 — VPT-Shallow)](#prompt-tuning-results-week-4--vpt-shallow)
+7. [Prompt-Tuning Results (Week 4 — VPT-Deep)](#prompt-tuning-results-week-4--vpt-deep)
+8. [Datasets Used](#datasets-used)
+9. [Methodology](#methodology)
+10. [Project Roadmap](#project-roadmap)
+11. [Team](#team)
+12. [Tech Stack](#tech-stack)
+13. [Ethics & Compliance](#ethics--compliance)
+14. [Expected Outcomes](#expected-outcomes)
+15. [Experiments & Evaluation](#experiments--evaluation)
+16. [References](#references)
+17. [License](#license)
+19. [Repository Link](#repository-link)
 
 ---
+
 
 ## 🧠 Project Overview
 
@@ -208,7 +210,7 @@ PromptViT-Percepta/
 
 ---
 
-## 📊 Baseline Results — ViT-B/16 (Full Fine-Tuning) Week 3
+## 📊 Baseline Results (Week 3)
 **Model:** ViT-B/16 (timm, pretrained on ImageNet-21k → 1k)  
 **Training Device:** GPU (CUDA)  
 **Epochs:** 60  
@@ -248,7 +250,7 @@ PromptViT-Percepta/
 
 ---
 
-## 🌱 Prompt-Tuning Results — VPT-Shallow (ViT-B/16) Week 4
+## 🌱 Prompt-Tuning Results (Week 4 — VPT-Shallow)
 
 **Method:** Visual Prompt Tuning (VPT-Shallow)  
 **Backbone:** ViT-B/16 (frozen)  
@@ -295,7 +297,7 @@ Compared to full fine-tuning:
 
 ---
 
-## 🔥 Prompt-Tuning Results — VPT-Deep (ViT-B/16) Week 4
+## 🔥 Prompt-Tuning Results (Week 4 — VPT-Deep)
 
 **Method:** Visual Prompt Tuning (VPT-Deep)  
 **Backbone:** ViT-B/16 (frozen)  
@@ -432,7 +434,7 @@ Goal: Provide **faithful, human-understandable** explanations of model predictio
 
 ---
 
-## 👥 Team Percepta
+## 👥 Team
 
 | Name | Role | Email |
 |------|------|-------|
